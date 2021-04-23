@@ -5,6 +5,7 @@ import argparse
 import itertools
 import os
 import psutil
+import re
 import time
 from glob import glob
 from pathlib import Path
@@ -25,20 +26,42 @@ DIRS_TO_CHECK = {
     "/var",
 }
 
+AUTOWHITELIST = {
+    "/var/cache/",
+    "/var/dcc/",
+    "/var/db/",
+    "/var/lib/",
+    "/var/log/",
+    "/var/spool/",
+}
+
 PKG_PATHS = {
     "app-admin/logrotate": {
         "/etc/logrotate.d",
+        "/var/lib/misc/logrotate.status",
+    },
+    "app-admin/monit": {
+        "/var/monit",
+        "/var/log/monit*",
     },
     "app-admin/salt": {
         "/etc/salt/minion.d/_schedule.conf",
         "/etc/salt/minion_id",
-        "/etc/salt/pki/*",
+        "/etc/salt/pki",
+        "/var/cache/salt",
+        "/var/log/salt",
     },
     "app-admin/sudo": {
         "/etc/sudoers.d",
     },
+    "app-admin/syslog-ng": {
+        "/var/lib/misc/syslog-ng.persist",
+    },
     "app-admin/system-config-printer": {
         "/usr/share/system-config-printer/*.pyc",
+    },
+    "app-portage/gentoolkit": {
+        "/var/cache/revdep-rebuild",
     },
     "app-backup/bareos": {
         "/etc/bareos/*/*/*.conf"
@@ -50,12 +73,14 @@ PKG_PATHS = {
         "/etc/letsencrypt/keys/*.pem",
         "/etc/letsencrypt/live",
         "/etc/letsencrypt/renewal/*.conf",
+        "/var/log/letsencrypt",
     },
     "app-editors/vim": {
         "/usr/share/vim/vim82/doc/tags",
     },
     "app-emulation/docker": {
         "/etc/docker/key.json",
+        "/var/lib/docker",
     },
     "app-emulation/libvirt": {
         "/etc/libvirt/nwfilter/*.xml",
@@ -65,6 +90,9 @@ PKG_PATHS = {
         "/etc/libvirt/qemu/networks/autostart/*.xml",
         "/etc/libvirt/storage/*.xml",
         "/etc/libvirt/storage/autostart/*.xml",
+        "/var/cache/libvirt",
+        "/var/lib/libvirt",
+        "/var/log/libvirt",
     },
     "app-i18n/ibus": {
         "/etc/dconf/db/ibus",
@@ -75,14 +103,30 @@ PKG_PATHS = {
     },
     "dev-db/mariadb": {
         "/etc/mysql/mariadb.d/*.cnf",
+        "/var/lib/mysql",
+        "/var/log/mysql",
     },
     "dev-lang/php": {
         "/etc/php/fpm*/fpm.d/*",
+        "/var/log/fpm",
+        "/var/log/php-fpm.log*",
     },
     "dev-libs/nss": {
         "/usr/lib*/libfreebl3.chk",
         "/usr/lib*/libnssdbm3.chk",
         "/usr/lib*/libsoftokn3.chk",
+    },
+    "dev-util/ccache": {
+        "/usr/lib/ccache",
+        "/var/cache/ccache",
+    },
+    "net-analyzer/fail2ban": {
+        "/etc/fail2ban/action.d",
+        "/etc/fail2ban/*/*.conf",
+        "/var/log/fail2ban*",
+    },
+    "net-analyzer/netdata": {
+        "/var/cache/netdata",
     },
     "net-dialup/ppp": {
         "/etc/ppp/chap-secrets",
@@ -117,6 +161,7 @@ PKG_PATHS = {
         "/etc/cups/printers.conf",
         "/etc/cups/subscriptions.conf",
         "/etc/cups/*.O",
+        "/var/cache/cups",
     },
     "dev-lang/mono": {
         "/usr/share/.mono/*/Trust",
@@ -133,11 +178,15 @@ PKG_PATHS = {
     "mail-filter/rspamd": {
         "/etc/rspamd/local.d/*",
     },
+    "mail-filter/dcc": {
+        "/var/dcc/whiteclnt.dccw",
+    },
     "mail-filter/spamassassin": {
         "/etc/mail/spamassassin/sa-update-keys",
     },
     "mail-mta/exim": {
         "/etc/exim/exim.conf",
+        "/var/spool/exim",
     },
     "media-video/vlc": {
         "/usr/lib*/vlc/plugins/plugins.dat",
@@ -148,22 +197,45 @@ PKG_PATHS = {
     "net-analyzer/librenms": {
         "/opt/librenms/.composer",
         "/opt/librenms/bootstrap/cache",
+        "/opt/librenms/cache",
+        "/opt/librenms/composer.phar",
         "/opt/librenms/config.php",
-        "/opt/librenms/logs/",
-        "/opt/librenms/rrd/",
+        "/opt/librenms/logs",
+        "/opt/librenms/rrd",
+        "/opt/librenms/storage",
         "/opt/librenms/vendor",
     },
     "net-analyzer/net-snmp": {
         "/etc/snmp/snmpd.conf",
+        "/var/log/net-snmpd.log",
+    },
+    "net-dns/avahi": {
+        "/etc/avahi/services/*.service",
     },
     "net-firewall/firehol": {
         "/etc/firehol/firehol.conf",
         "/etc/firehol/fireqos.conf",
         "/etc/firehol/ipsets",
         "/etc/firehol/services",
+        "/var/lib/spool/firehol",
+        "/var/lib/run/firehol",
+        "/var/lib/run/fireqos",
+        "/var/spool/firehol",
+    },
+    "net-mail/dovecot": {
+        "/var/lib/dovecot",
+        "/var/log/dovecot",
+        "/var/sieve-scripts",
+    },
+    "net-misc/asterisk": {
+        "/etc/asterisk/*.adsi",
+        "/etc/asterisk/*.conf",
     },
     "net-misc/geoipupdate": {
         "/usr/share/GeoIP",
+    },
+    "net-misc/networkmanager": {
+        "/var/lib/NetworkManager",
     },
     "net-misc/openssh": {
         "/etc/ssh/ssh_host_*",
@@ -174,12 +246,21 @@ PKG_PATHS = {
     },
     "net-ftp/proftpd": {
         "/etc/proftpd/proftpd.conf",
+        "/var/log/proftpd",
+        "/var/log/xferlog*",
     },
     "net-vpn/openvpn": {
         "/etc/openvpn",
+        "/var/log/openvpn",
+    },
+    "sys-apps/accountsservice": {
+        "/var/lib/AccountsService",
     },
     "sys-apps/lm-sensors": {
         "/etc/modules-load.d/lm_sensors.conf",
+    },
+    "sys-apps/man-db": {
+        "/var/cache/man",
     },
     "sys-fs/cryptsetup": {
         "/etc/crypttab",
@@ -189,8 +270,15 @@ PKG_PATHS = {
         "/etc/lvm/archive",
         "/etc/lvm/cache/.cache",
     },
+    "sys-kernel/genkernel": {
+        "/var/cache/genkernel",
+        "/var/log/genkernel.log",
+    },
     "sys-libs/cracklib": {
         "/usr/lib*/cracklib_dict.*",
+    },
+    "sys-power/acpid": {
+        "/var/log/acpid"
     },
     "www-apps/guacamole-client": {
         "/etc/guacamole/lib/*",
@@ -202,6 +290,7 @@ PKG_PATHS = {
         "/etc/runlevels/*/tomcat-*",
         "/etc/tomcat-*",
         "/var/lib/tomcat-*",
+        "/var/log/tomcat-*",
     },
 }
 
@@ -252,7 +341,6 @@ WHITELIST = {
     "/etc/environment.d/10-gentoo-env.conf",
     "/usr/bin/c89",
     "/usr/bin/c99",
-    "/usr/lib/ccache",
     "/usr/portage",
     "/usr/sbin/fix_libtool_files.sh",
     "/usr/share/applications/mimeinfo.cache",
@@ -260,22 +348,21 @@ WHITELIST = {
     "/usr/share/info/dir",
     "/usr/share/mime",
     "/var/.updated",
-    "/var/cache",
-    "/var/db",
-    "/var/lib/alsa/asound.state",
-    "/var/lib/chkboot",
-    "/var/lib/dbus/machine-id",
-    "/var/lib/dhcp/dhcpd.leases",
-    "/var/lib/flatpak",
-    "/var/lib/gentoo/news",
-    "/var/lib/layman",
+    "/var/cache/edb",
+    "/var/cache/distfiles",
+    "/var/cache/ldconfig",
+    "/var/db/pkg",
+    "/var/db/repos",
+    "/var/lib/misc/random-seed",
     "/var/lib/module-rebuild/moduledb",
-    "/var/lib/portage",
-    "/var/lib/sddm/.cache",
     "/var/lock",
-    "/var/log",
+    *glob("/var/log/btmp*"),
+    "/var/log/dmesg",
+    *glob("/var/log/emerge*"),
+    "/var/log/faillog",
+    "/var/log/lastlog",
+    *glob("/var/log/wtmp*"),
     "/var/run",
-    "/var/spool",
     "/var/tmp",
     *glob("/etc/ssl/*"),
     *glob("/etc/sysctl.d/*"),
@@ -289,7 +376,7 @@ WHITELIST = {
     *glob("/usr/share/fonts/*/*.dir"),
     *glob("/usr/share/fonts/*/*.scale"),
     *glob("/usr/src/linux*"),  # Ignore kernel source directories
-    *glob("/var/www/*"),
+    "/var/www",
 }
 
 
@@ -337,14 +424,20 @@ def installed_packages():
         if package_exist(pkg):
             whitelist_append(directories)
 
-    if package_exist("sys-process/dcron") or package_exist("sys-process/cronie") or package_exist("sys-process/fcron"):
-        WHITELIST.update({"/etc/cron.daily"})
-        WHITELIST.update({"/etc/cron.monthly"})
-        WHITELIST.update({"/etc/cron.weekly"})
+    if package_exist("app-admin/metalog") or package_exist("app-admin/newsyslog") or package_exist("app-admin/syslog-ng"):
+        WHITELIST.update({*glob("/var/log/messages*")})
 
     if package_exist("app-office/libreoffice") or package_exist("app-office/libreoffice-bin"):
         WHITELIST.update({*glob("/usr/lib*/libreoffice/program/resource/common/fonts/.uuid")})
         WHITELIST.update({*glob("/usr/lib*/libreoffice/share/fonts/truetype/.uuid")})
+
+    if package_exist("dev-lang/rust") or package_exist("dev-lang/rust-bin"):
+        WHITELIST.update({"/etc/env.d/rust/last-set"})
+
+    if package_exist("sys-process/dcron") or package_exist("sys-process/cronie") or package_exist("sys-process/fcron"):
+        WHITELIST.update({"/etc/cron.daily"})
+        WHITELIST.update({"/etc/cron.monthly"})
+        WHITELIST.update({"/etc/cron.weekly"})
 
     if check_process("systemd"):
         WHITELIST.update({"/etc/systemd/network"})
@@ -411,7 +504,7 @@ def main() -> None:
                 ]
 
             for name in filenames:
-                filepath = os.path.join(dirpath, name.encode('utf-8', 'replace').decode())
+                filepath = os.path.join(dirpath, name).encode("utf-8", "replace").decode()
                 if any(f in tracked for f in resolve_symlinks(filepath)):
                     continue
                 if args.strict is False and should_ignore_path(filepath):
@@ -554,7 +647,10 @@ def normalize_filenames(files: List[str]) -> Set[str]:
         ctype, rem = f.rstrip().split(" ", maxsplit=1)
         if ctype == "dir":
             # format: dir <path>
+            parts = rem.rsplit(" ", maxsplit=2)
             normalized.update(resolve_symlinks(rem))
+            if any(re.search("^" + item, parts[0]) for item in AUTOWHITELIST):
+                WHITELIST.update({parts[0]})
 
         elif ctype == "obj":
             # format: obj <path> <md5sum> <unixtime>

@@ -349,6 +349,7 @@ WHITELIST = {
     "/usr/share/mime",
     "/var/.updated",
     "/var/cache/edb",
+    "/var/cache/binpkgs",  # where are stored binary packages
     "/var/cache/distfiles",
     "/var/cache/ldconfig",
     "/var/db/pkg",

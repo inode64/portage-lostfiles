@@ -272,6 +272,9 @@ PKG_PATHS = {
     "sys-apps/man-db": {
         "/var/cache/man",
     },
+    "sys-apps/sysvinit": {
+        "/etc/inittab.d/*.tab"
+    }
     "sys-cluster/heartbeat": {
         "/etc/ha.d/authkeys",
         "/etc/ha.d/ha.cf",

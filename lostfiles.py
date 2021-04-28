@@ -60,9 +60,6 @@ PKG_PATHS = {
     "app-admin/system-config-printer": {
         "/usr/share/system-config-printer/*.pyc",
     },
-    "app-portage/gentoolkit": {
-        "/var/cache/revdep-rebuild",
-    },
     "app-backup/bareos": {
         "/etc/bareos/*/*/*.conf"
     },
@@ -97,6 +94,9 @@ PKG_PATHS = {
     "app-i18n/ibus": {
         "/etc/dconf/db/ibus",
     },
+    "app-portage/gentoolkit": {
+        "/var/cache/revdep-rebuild",
+    },
     "app-text/docbook-xml-dtd": {
         "/etc/xml/catalog",
         "/etc/xml/docbook",
@@ -105,6 +105,12 @@ PKG_PATHS = {
         "/etc/mysql/mariadb.d/*.cnf",
         "/var/lib/mysql",
         "/var/log/mysql",
+    },
+    "dev-db/postgresql": {
+        "/var/lib/postgresql",
+    },
+    "dev-lang/mono": {
+        "/usr/share/.mono/*/Trust",
     },
     "dev-lang/php": {
         "/etc/php/fpm*/fpm.d/*",
@@ -116,14 +122,61 @@ PKG_PATHS = {
         "/usr/lib*/libnssdbm3.chk",
         "/usr/lib*/libsoftokn3.chk",
     },
+    "dev-php/PEAR-PEAR": {
+        "/usr/share/php/.channels",
+        "/usr/share/php/.packagexml",
+        "/usr/share/php/.registry",
+        "/usr/share/php/.filemap",
+        "/usr/share/php/.lock",
+        "/usr/share/php/.depdblock",
+        "/usr/share/php/.depdb",
+    },
     "dev-util/ccache": {
         "/usr/lib/ccache",
         "/var/cache/ccache",
+    },
+    "mail-filter/dcc": {
+        "/var/dcc/whiteclnt.dccw",
+    },
+    "mail-filter/rspamd": {
+        "/etc/rspamd/local.d/*",
+    },
+    "mail-filter/spamassassin": {
+        "/etc/mail/spamassassin/sa-update-keys",
+    },
+    "mail-mta/exim": {
+        "/etc/exim/exim.conf",
+        "/var/spool/exim",
+    },
+    "media-gfx/graphviz": {
+        "/usr/lib*/graphviz/config6",
+    },
+    "media-video/vlc": {
+        "/usr/lib*/vlc/plugins/plugins.dat",
     },
     "net-analyzer/fail2ban": {
         "/etc/fail2ban/action.d",
         "/etc/fail2ban/*/*.conf",
         "/var/log/fail2ban*",
+    },
+    "net-analyzer/librenms": {
+        "/opt/librenms/.composer",
+        "/opt/librenms/.env",
+        "/opt/librenms/.subversion",
+        "/opt/librenms/bootstrap/cache",
+        "/opt/librenms/cache",
+        "/opt/librenms/composer.phar",
+        "/opt/librenms/config.php",
+        "/opt/librenms/html/js/*.js",
+        "/opt/librenms/html/plugins",
+        "/opt/librenms/logs",
+        "/opt/librenms/rrd",
+        "/opt/librenms/storage",
+        "/opt/librenms/vendor",
+    },
+    "net-analyzer/net-snmp": {
+        "/etc/snmp/snmpd.conf",
+        "/var/log/net-snmpd.log",
     },
     "net-analyzer/netdata": {
         "/var/cache/netdata",
@@ -134,83 +187,13 @@ PKG_PATHS = {
         "/etc/ppp/ip-down.d",
         "/etc/ppp/ip-up.d",
     },
+    "net-dns/avahi": {
+        "/etc/avahi/services/*.service",
+    },
     "net-dns/bind": {
         "/etc/bind/rndc.key",
         "/etc/bind/rndc.conf",
         "/var/bind",
-    },
-    "net-fs/samba": {
-        "/etc/samba/smb.conf",
-        "/etc/samba/smbusers",
-    },
-    "net-misc/dhcpcd": {
-        "/etc/dhcpcd.duid",
-    },
-    "net-misc/dhcp": {
-        "/etc/dhcp/dhclient-*.conf",
-    },
-    "net-misc/dahdi-tools": {
-        "/etc/dahdi/assigned-spans.*",
-        "/etc/dahdi/system.*",
-    },
-    "net-print/cups": {
-        "/etc/printcap",
-        "/etc/cups/classes.conf",
-        "/etc/cups/ppd",
-        "/etc/cups/ssl",
-        "/etc/cups/printers.conf",
-        "/etc/cups/subscriptions.conf",
-        "/etc/cups/*.O",
-        "/var/cache/cups",
-    },
-    "dev-lang/mono": {
-        "/usr/share/.mono/*/Trust",
-    },
-    "dev-php/PEAR-PEAR": {
-        "/usr/share/php/.channels",
-        "/usr/share/php/.packagexml",
-        "/usr/share/php/.registry",
-        "/usr/share/php/.filemap",
-        "/usr/share/php/.lock",
-        "/usr/share/php/.depdblock",
-        "/usr/share/php/.depdb",
-    },
-    "mail-filter/rspamd": {
-        "/etc/rspamd/local.d/*",
-    },
-    "mail-filter/dcc": {
-        "/var/dcc/whiteclnt.dccw",
-    },
-    "mail-filter/spamassassin": {
-        "/etc/mail/spamassassin/sa-update-keys",
-    },
-    "mail-mta/exim": {
-        "/etc/exim/exim.conf",
-        "/var/spool/exim",
-    },
-    "media-video/vlc": {
-        "/usr/lib*/vlc/plugins/plugins.dat",
-    },
-    "media-gfx/graphviz": {
-        "/usr/lib*/graphviz/config6",
-    },
-    "net-analyzer/librenms": {
-        "/opt/librenms/.composer",
-        "/opt/librenms/bootstrap/cache",
-        "/opt/librenms/cache",
-        "/opt/librenms/composer.phar",
-        "/opt/librenms/config.php",
-        "/opt/librenms/logs",
-        "/opt/librenms/rrd",
-        "/opt/librenms/storage",
-        "/opt/librenms/vendor",
-    },
-    "net-analyzer/net-snmp": {
-        "/etc/snmp/snmpd.conf",
-        "/var/log/net-snmpd.log",
-    },
-    "net-dns/avahi": {
-        "/etc/avahi/services/*.service",
     },
     "net-firewall/firehol": {
         "/etc/firehol/firehol.conf",
@@ -222,6 +205,15 @@ PKG_PATHS = {
         "/var/lib/run/fireqos",
         "/var/spool/firehol",
     },
+    "net-fs/samba": {
+        "/etc/samba/smb.conf",
+        "/etc/samba/smbusers",
+    },
+    "net-ftp/proftpd": {
+        "/etc/proftpd/proftpd.conf",
+        "/var/log/proftpd",
+        "/var/log/xferlog*",
+    },
     "net-mail/dovecot": {
         "/var/lib/dovecot",
         "/var/log/dovecot",
@@ -230,6 +222,16 @@ PKG_PATHS = {
     "net-misc/asterisk": {
         "/etc/asterisk/*.adsi",
         "/etc/asterisk/*.conf",
+    },
+    "net-misc/dahdi-tools": {
+        "/etc/dahdi/assigned-spans.*",
+        "/etc/dahdi/system.*",
+    },
+    "net-misc/dhcp": {
+        "/etc/dhcp/dhclient-*.conf",
+    },
+    "net-misc/dhcpcd": {
+        "/etc/dhcpcd.duid",
     },
     "net-misc/geoipupdate": {
         "/usr/share/GeoIP",
@@ -244,10 +246,18 @@ PKG_PATHS = {
         "/etc/teamviewer*/global.conf",
         "/opt/teamviewer*/rolloutfile.*",
     },
-    "net-ftp/proftpd": {
-        "/etc/proftpd/proftpd.conf",
-        "/var/log/proftpd",
-        "/var/log/xferlog*",
+    "net-print/cups": {
+        "/etc/printcap",
+        "/etc/cups/classes.conf",
+        "/etc/cups/ppd",
+        "/etc/cups/ssl",
+        "/etc/cups/printers.conf",
+        "/etc/cups/subscriptions.conf",
+        "/etc/cups/*.O",
+        "/var/cache/cups",
+    },
+    "net-print/cups-pdf": {
+        "/var/spool/cups-pdf",
     },
     "net-vpn/openvpn": {
         "/etc/openvpn",
@@ -261,6 +271,13 @@ PKG_PATHS = {
     },
     "sys-apps/man-db": {
         "/var/cache/man",
+    },
+    "sys-cluster/heartbeat": {
+        "/etc/ha.d/authkeys",
+        "/etc/ha.d/ha.cf",
+        "/etc/ha.d/ha_logd.cf",
+        "/etc/ha.d/haresources",
+        "/etc/ha.d/resource.d/*",
     },
     "sys-fs/cryptsetup": {
         "/etc/crypttab",
@@ -356,6 +373,7 @@ WHITELIST = {
     "/var/db/repos",
     "/var/lib/misc/random-seed",
     "/var/lib/module-rebuild/moduledb",
+    "/var/lib/portage",
     "/var/lock",
     *glob("/var/log/btmp*"),
     "/var/log/dmesg",

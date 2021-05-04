@@ -205,6 +205,9 @@ PKG_PATHS = {
         "/var/lib/run/fireqos",
         "/var/spool/firehol",
     },
+    "net-fs/nfs-utils": {
+        "/etc/exports.d",
+    },
     "net-fs/samba": {
         "/etc/samba/smb.conf",
         "/etc/samba/smbusers",
